@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Escape Room: Misión Sistema Solar</title>
+<style>
+:root{--bg:#0d1b2a;--card:#14283d;--text:#f4efe6;--muted:#9fb3c8;--accent:#f5a524;--ok:#4cc9a0;--bad:#ff7b7b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Trebuchet MS',Arial,sans-serif;min-height:100vh;
+background-image:radial-gradient(circle at 20% 10%,#1b3a5c 0,transparent 45%),radial-gradient(circle at 85% 90%,#2a1b4a 0,transparent 40%)}
+main{max-width:760px;margin:0 auto;padding:24px 20px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:15px;color:var(--muted);margin-bottom:24px;flex-wrap:wrap}
+.pill{background:var(--card);border-radius:999px;padding:6px 14px}
+#timer{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+.room{display:none;animation:in .4s ease}
+.room.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.tag{color:var(--accent);letter-spacing:3px;font-weight:700;font-size:14px;margin:0 0 8px}
+h1{font-size:clamp(32px,7vw,52px);line-height:1.1;margin:0 0 16px}
+h2{font-size:clamp(26px,5.5vw,38px);line-height:1.15;margin:0 0 16px}
+p{line-height:1.55;font-size:18px;margin:0 0 16px}
+.card{background:var(--card);border-radius:16px;padding:22px;margin:20px 0}
+input{width:100%;font:inherit;font-size:20px;padding:14px 16px;border-radius:12px;border:2px solid #2d4a68;background:#0d1b2a;color:var(--text)}
+input:focus{outline:none;border-color:var(--accent)}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-size:18px;font-weight:700;border:0;border-radius:12px;padding:14px 22px;cursor:pointer;background:var(--accent);color:#1a1200}
+button.alt{background:transparent;color:var(--text);border:2px solid #2d4a68}
+button:disabled{opacity:.5;cursor:default}
+.msg{min-height:26px;font-weight:700;margin-top:12px}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.hint{color:var(--muted);font-style:italic;margin-top:12px;display:none}
+.digit{display:inline-block;background:var(--accent);color:#1a1200;font-size:44px;font-weight:700;border-radius:12px;padding:6px 22px;margin:0 8px 0 0}
+.code{display:flex;gap:10px;margin:16px 0}
+.code input{text-align:center;font-size:32px;padding:12px 0;width:25%}
+.slots{display:flex;gap:8px;margin-top:8px}
+.slot{width:48px;height:56px;border-radius:10px;background:var(--card);border:2px dashed #2d4a68;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--accent)}
+.slot.f{border-style:solid;border-color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+<header>
+<span class="pill" id="prog">Misión Helios</span>
+<span class="pill">Tiempo: <span id="timer">40:00</span></span>
+</header>
+
+<section class="room on" id="r0">
+<p class="tag">ESCAPE ROOM · SISTEMA SOLAR</p>
+<h1>Misión: escapa de la nave Helios</h1>
+<p>Un meteorito dañó la nave. Resuelve los enigmas de las 4 salas, anota el dígito que te da cada una y usa el código de 4 dígitos para abrir la compuerta final.</p>
+<p>Tienes 40 minutos de oxígeno. Cada sala tiene una pista por si te atoras.</p>
+<div class="row"><button id="start">Comenzar misión</button></div>
+</section>
+
+<section class="room" id="r1"></section>
+<section class="room" id="r2"></section>
+<section class="room" id="r3"></section>
+<section class="room" id="r4"></section>
+
+<section class="room" id="r5">
+<p class="tag">COMPUERTA FINAL</p>
+<h2>Ingresa el código</h2>
+<p>Escribe los 4 dígitos en el orden de las salas: 1, 2, 3 y 4.</p>
+<div class="slots" id="slots"></div>
+<div class="code" id="code">
+<input inputmode="numeric" maxlength="1" aria-label="Dígito 1">
+<input inputmode="numeric" maxlength="1" aria-label="Dígito 2">
+<input inputmode="numeric" maxlength="1" aria-label="Dígito 3">
+<input inputmode="numeric" maxlength="1" aria-label="Dígito 4">
+</div>
+<div class="row"><button id="open">Abrir compuerta</button></div>
+<div class="msg" id="msg5"></div>
+</section>
+
+<section class="room" id="r6">
+<p class="tag">COMPUERTA ABIERTA</p>
+<h1>¡Escaparon de la nave Helios!</h1>
+<p>Misión cumplida. Reto final: nombra los 8 planetas en orden desde el Sol, sin mirar tus notas.</p>
+<div class="card" id="orden" style="display:none"><p style="margin:0">Mercurio, Venus, Tierra, Marte, Júpiter, Saturno, Urano y Neptuno.</p></div>
+<div class="row"><button class="alt" id="show">Ver respuesta</button><button id="again">Jugar de nuevo</button></div>
+</section>
+
+<section class="room" id="r7">
+<p class="tag">TIEMPO AGOTADO</p>
+<h1>Se acabó el oxígeno</h1>
+<p>No lograron escapar a tiempo, pero pueden intentarlo otra vez.</p>
+<div class="row"><button id="retry">Reintentar</button></div>
+</section>
+</main>
+
+<script>
+var CODE="4568";
+var salas=[
+{t:"SALA 1 · EL TALLER DE ROCAS",h:"Navegación bloqueada",q:"Los planetas interiores son rocosos y están antes del cinturón de asteroides. ¿Cuántos son? Escribe el número.",a:["4","cuatro"],d:"4",hint:"Empieza en Mercurio y avanza hacia afuera hasta Marte."},
+{t:"SALA 2 · LA CÁMARA DE TORMENTAS",h:"Motores sobrecargados",q:"Soy el planeta más grande y tengo una tormenta gigante llamada la Gran Mancha Roja. ¿Qué planeta soy?",a:["jupiter"],d:"5",hint:"Vengo después del cinturón de asteroides. Mi lugar desde el Sol es tu dígito."},
+{t:"SALA 3 · EL JARDÍN DE ANILLOS",h:"Escudos desactivados",q:"Mis anillos son los más famosos y soy el segundo planeta más grande. ¿Qué planeta soy?",a:["saturno"],d:"6",hint:"Vengo justo después del planeta de la Gran Mancha Roja."},
+{t:"SALA 4 · LA COMPUERTA HELADA",h:"Oxígeno en reserva",q:"Soy el planeta más lejano del Sol, de color azul intenso y con vientos muy veloces. ¿Qué planeta soy?",a:["neptuno"],d:"8",hint:"Plutón ya no se cuenta como planeta."}
+];
+var $=function(i){return document.getElementById(i)};
+var cur=0,left=2400,tick=null,found=[];
+function norm(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()}
+function show(n){
+ cur=n;
+ document.querySelectorAll(".room").forEach(function(r){r.classList.remove("on")});
+ $("r"+n).classList.add("on");
+ $("prog").textContent=n===0?"Misión Helios":n<=4?"Sala "+n+" de 4":n===5?"Compuerta final":"Misión Helios";
+ window.scrollTo(0,0);
+}
+function build(){
+ salas.forEach(function(s,i){
+  $("r"+(i+1)).innerHTML='<p class="tag">'+s.t+'</p><h2>'+s.h+'</h2><div class="card"><p>'+s.q+'</p></div>'+
+  '<input id="in'+i+'" placeholder="Tu respuesta" autocomplete="off">'+
+  '<div class="row"><button id="ok'+i+'">Probar respuesta</button><button class="alt" id="hb'+i+'">Pedir pista</button></div>'+
+  '<div class="msg" id="m'+i+'"></div><p class="hint" id="h'+i+'">Pista: '+s.hint+'</p>'+
+  '<div id="dg'+i+'" style="display:none"><p><span class="digit">'+s.d+'</span> Este es tu dígito del código. Anótalo.</p><div class="row"><button id="nx'+i+'">'+(i<3?"Ir a la siguiente sala":"Ir a la compuerta final")+'</button></div></div>';
+  var go=function(){
+   var v=norm($("in"+i).value),m=$("m"+i);
+   if(s.a.indexOf(v)>-1){m.textContent="¡Correcto! Sala desbloqueada.";m.className="msg ok";$("dg"+i).style.display="block";$("ok"+i).disabled=true;$("in"+i).disabled=true;found[i]=s.d;fillSlots()}
+   else{m.textContent="Respuesta incorrecta. Intenta de nuevo.";m.className="msg bad"}
+  };
+  $("ok"+i).onclick=go;
+  $("in"+i).onkeydown=function(e){if(e.key==="Enter")go()};
+  $("hb"+i).onclick=function(){$("h"+i).style.display="block"};
+  $("nx"+i).onclick=function(){show(i+2)};
+ });
+ var sl=$("slots");sl.innerHTML="";for(var k=0;k<4;k++){var d=document.createElement("div");d.className="slot";sl.appendChild(d)}
+}
+function fillSlots(){
+ var els=$("slots").children;
+ for(var k=0;k<4;k++){els[k].textContent=found[k]||"";els[k].className="slot"+(found[k]?" f":"")}
+}
+function startTimer(){
+ clearInterval(tick);
+ tick=setInterval(function(){
+  left--;var m=Math.floor(left/60),s=left%60;
+  $("timer").textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+  if(left<=0){clearInterval(tick);show(7)}
+ },1000);
+}
+function reset(){
+ left=2400;found=[];$("timer").textContent="40:00";$("orden").style.display="none";
+ $("msg5").textContent="";document.querySelectorAll("#code input").forEach(function(i){i.value=""});
+ build();show(0);
+}
+$("start").onclick=function(){startTimer();show(1)};
+$("again").onclick=function(){clearInterval(tick);reset()};
+$("retry").onclick=reset;
+$("show").onclick=function(){$("orden").style.display="block"};
+var ci=document.querySelectorAll("#code input");
+ci.forEach(function(el,i){
+ el.oninput=function(){el.value=el.value.replace(/\D/g,"");if(el.value&&ci[i+1])ci[i+1].focus()};
+ el.onkeydown=function(e){if(e.key==="Backspace"&&!el.value&&ci[i-1])ci[i-1].focus();if(e.key==="Enter")$("open").click()};
+});
+$("open").onclick=function(){
+ var v="";ci.forEach(function(e){v+=e.value});
+ var m=$("msg5");
+ if(v===CODE){clearInterval(tick);show(6)}
+ else{m.textContent="Código incorrecto. Revisa los dígitos de cada sala.";m.className="msg bad"}
+};
+build();
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Escape Room: Misión Sistema Solar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap">
+<style>
+:root{--bg:#050b1a;--panel:rgba(12,28,54,.82);--line:#1f3b66;--text:#e8f1ff;--mut:#8fa6c4;--cy:#5ce1ff;--am:#ffb84d;--ok:#5df2b0;--bad:#ff6b8a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Trebuchet MS',Arial,sans-serif;min-height:100vh}
+#sky{position:fixed;inset:0;z-index:0}
+.sun{position:fixed;right:-160px;top:-160px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,#ffcf3a 0,rgba(255,150,40,.35) 35%,transparent 70%);animation:pulse 5s ease-in-out infinite;z-index:0}
+@keyframes pulse{50%{transform:scale(1.12);opacity:.75}}
+header,main{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:0 18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:18px;padding-bottom:10px}
+.brand{font-family:Orbitron,sans-serif;font-weight:900;letter-spacing:3px;color:var(--cy);font-size:15px}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-family:Orbitron,sans-serif;font-size:14px}
+#timer{color:var(--am);font-variant-numeric:tabular-nums}
+#timer.warn{color:var(--bad);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.sl{display:inline-flex;width:30px;height:34px;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:8px;margin:0 2px;color:var(--mut)}
+.sl.f{border:1px solid var(--am);color:var(--am);box-shadow:0 0 12px rgba(255,184,77,.6);animation:pop .5s}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.3)}100%{transform:scale(1)}}
+.scr{display:none}.scr.on{display:block;animation:in .5s ease}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.tag{font-family:Orbitron,sans-serif;color:var(--cy);letter-spacing:2px;font-size:13px;margin:18px 0 6px}
+h1,h2{font-family:Orbitron,sans-serif;line-height:1.15;margin:0 0 14px}
+h1{font-size:clamp(28px,6.5vw,46px)}h2{font-size:clamp(22px,5vw,30px)}
+p{font-size:18px;line-height:1.55;margin:0 0 14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0;backdrop-filter:blur(4px)}
+.fl{display:flex;justify-content:center;margin-top:8px;animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+input{width:100%;font:inherit;font-size:20px;padding:14px;border-radius:12px;border:2px solid var(--line);background:#07142a;color:var(--text)}
+input:focus{outline:none;border-color:var(--cy);box-shadow:0 0 14px rgba(92,225,255,.4)}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:12px;padding:13px 20px;cursor:pointer;background:linear-gradient(135deg,var(--cy),#3b8cff);color:#04101f;transition:transform .15s,box-shadow .15s}
+button:hover{transform:translateY(-2px);box-shadow:0 0 16px rgba(92,225,255,.6)}
+button.alt{background:transparent;color:var(--text);border:2px solid var(--line)}
+button:disabled{opacity:.45;pointer-events:none}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.pl{background:var(--panel);border:2px solid var(--line);padding:10px;display:flex;justify-content:center;position:relative}
+.pl.done{border-color:var(--ok);box-shadow:0 0 14px rgba(93,242,176,.5)}
+.pl.done::after{content:attr(data-n);position:absolute;top:4px;right:8px;color:var(--ok);font-family:Orbitron,sans-serif}
+.pl svg{max-width:100%;height:auto}
+.msg{min-height:26px;font-weight:700;margin-top:10px}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.hint{display:none;color:var(--mut);font-style:italic}
+.mut{color:var(--mut);font-size:15px}
+.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.alarm{animation:alarm .45s}
+@keyframes alarm{50%{box-shadow:inset 0 0 120px rgba(255,60,90,.55)}}
+.rev{display:flex;align-items:center;gap:14px;margin-top:16px;font-size:18px}
+.lt{font-family:Orbitron,sans-serif;font-size:54px;font-weight:900;color:var(--am);text-shadow:0 0 18px var(--am);animation:pop .7s}
+.hero{display:flex;justify-content:center;margin:12px 0}
+.orb{position:relative;width:250px;height:250px;display:flex;align-items:center;justify-content:center;animation:float 5s ease-in-out infinite}
+.orb .m{position:absolute;inset:0;animation:spin 7s linear infinite}
+.orb .m i{position:absolute;top:2px;left:50%;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#9aa);box-shadow:0 0 10px #fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rocket{display:flex;justify-content:center;animation:lift 3.2s ease-in infinite}
+@keyframes lift{0%{transform:translateY(40px)}100%{transform:translateY(-60px)}}
+.flame{animation:fl .15s alternate infinite;transform-origin:50% 0}
+@keyframes fl{to{transform:scaleY(1.5)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas><div class="sun"></div>
+<header><span class="brand">HELIOS · CONTROL</span><span class="pill" id="slots"></span><span class="pill"><span id="timer">50:00</span></span></header>
+<main id="app">
+<section class="scr on" id="intro">
+<div class="hero"><div class="orb" id="orb"><div class="m"><i></i></div></div></div>
+<p class="tag">ESCAPE ROOM · SISTEMA SOLAR</p>
+<h1>Misión: escapa de la nave Helios</h1>
+<p>Un meteorito dañó la nave. Hay 6 salas con 2 retos cada una. Cada sala te da una letra: juntas forman la palabra que abre la compuerta final.</p>
+<p class="mut">Tienes 50 minutos de oxígeno. Si te equivocas se activa la alarma, pero puedes pedir una pista en cada reto.</p>
+<div class="row"><button id="start">Comenzar misión</button></div>
+</section>
+<section class="scr" id="game"><div id="room"></div></section>
+<section class="scr" id="door">
+<p class="tag">COMPUERTA FINAL</p>
+<h2>Escribe la palabra secreta</h2>
+<p>Junta las 6 letras en el orden de las salas. Es el nombre de la nave.</p>
+<input id="word" placeholder="Palabra de 6 letras" autocomplete="off" maxlength="12">
+<div class="row"><button id="open">Abrir compuerta</button></div>
+<div class="msg" id="dm"></div>
+</section>
+<section class="scr" id="win">
+<div class="rocket"><svg viewBox="0 0 80 140" width="110" aria-label="Cohete"><path d="M40 4C55 24 58 60 54 96H26C22 60 25 24 40 4Z" fill="#e8f1ff"/><circle cx="40" cy="50" r="9" fill="#5ce1ff"/><path d="M26 76L8 104L26 96ZM54 76L72 104L54 96Z" fill="#ff6b8a"/><g class="flame"><path d="M32 98H48L40 134Z" fill="#ffb84d"/></g></svg></div>
+<p class="tag">COMPUERTA ABIERTA</p>
+<h1>¡Escaparon de la nave Helios!</h1>
+<p>Misión cumplida. Reto final: nombra los 8 planetas en orden desde el Sol, sin mirar tus notas.</p>
+<div class="row"><button id="again">Jugar de nuevo</button></div>
+</section>
+<section class="scr" id="lose">
+<p class="tag">TIEMPO AGOTADO</p>
+<h1>Se acabó el oxígeno</h1>
+<p>No lograron escapar a tiempo, pero pueden intentarlo otra vez.</p>
+<div class="row"><button id="retry">Reintentar</button></div>
+</section>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)},ri=0,qi=0,L=[],left=3000,tk,gid=0;
+var ORD=["mercurio","venus","tierra","marte","jupiter","saturno","urano","neptuno"];
+var PL={mercurio:{c:"#9d9d9d",cr:[[42,48,7],[76,70,9],[62,34,5],[48,82,6]]},
+venus:{b:["#e8c07a","#d9a95a","#f0cf94","#d9a95a","#e8c07a"]},
+tierra:{c:"#2f7fd1",ln:[[48,52,17,10],[76,72,13,8],[72,38,9,6]]},
+marte:{c:"#c1583a",cr:[[45,50,8],[74,68,10],[60,32,6]]},
+jupiter:{b:["#d8b48a","#b5835a","#e9d3b0","#a8714a","#e3c9a4","#b98a62"],sp:[78,74,11,6,"#c0502f"]},
+saturno:{b:["#e8d29a","#d4b87a","#efdfb4","#cfb274"],r:30,ring:1},
+urano:{c:"#8fe3e6"},
+neptuno:{c:"#2e57d6",sp:[50,50,10,5,"#1c3aa0"]},
+pluton:{c:"#c9a98a",heart:1,cr:[[34,66,12]]}};
+function P(k,s){var d=PL[k],r=d.r||44,i="g"+(gid++),b=d.b,o='<svg viewBox="0 0 120 120" width="'+s+'" height="'+s+'" aria-label="'+k+'"><defs><radialGradient id="'+i+'" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></radialGradient><clipPath id="c'+i+'"><circle cx="60" cy="60" r="'+r+'"/></clipPath></defs>';
+ var ring='stroke="#cdb98a" stroke-width="7" fill="none" transform="rotate(-18 60 60)"';
+ if(d.ring)o+='<ellipse cx="60" cy="60" rx="58" ry="15" '+ring+'/>';
+ o+='<g clip-path="url(#c'+i+')">';
+ if(b)b.forEach(function(c,j){var h=2*r/b.length;o+='<rect x="0" y="'+(60-r+j*h)+'" width="120" height="'+(h+1)+'" fill="'+c+'"/>'});
+ else o+='<rect width="120" height="120" fill="'+d.c+'"/>';
+ (d.cr||[]).forEach(function(c){o+='<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+c[2]+'" fill="#000" opacity=".22"/>'});
+ (d.ln||[]).forEach(function(c){o+='<ellipse cx="'+c[0]+'" cy="'+c[1]+'" rx="'+c[2]+'" ry="'+c[3]+'" fill="#4fae62"/>'});
+ if(d.sp)o+='<ellipse cx="'+d.sp[0]+'" cy="'+d.sp[1]+'" rx="'+d.sp[2]+'" ry="'+d.sp[3]+'" fill="'+d.sp[4]+'"/>';
+ if(d.heart)o+='<path d="M62 80C40 64 44 46 56 50C60 52 62 56 62 56C62 56 66 48 74 50C86 54 82 66 62 80Z" fill="#f2e6d8"/>';
+ o+='</g><circle cx="60" cy="60" r="'+r+'" fill="url(#'+i+')"/>';
+ if(d.ring)o+='<path d="M2 60A58 15 0 0 0 118 60" '+ring+'/>';
+ return o+'</svg>'}
+var R=[
+{t:"HANGAR DE RECONOCIMIENTO",l:"H",qs:[
+{q:"El radar detecta un planeta con anillos enormes. Toca el que sea Saturno.",o:["marte","saturno","neptuno","tierra"],a:"saturno",h:"Busca los anillos."},
+{q:"Este planeta es el más grande de todos y tiene una tormenta gigante. ¿Cómo se llama?",k:"jupiter",a:["jupiter"],h:"Su tormenta se llama Gran Mancha Roja."}]},
+{t:"ESCLUSA DE ROCAS",l:"E",qs:[
+{q:"Los planetas rocosos están antes del cinturón de asteroides. ¿Cuántos son? Escribe el número.",a:["4","cuatro"],h:"Mercurio, Venus, Tierra y otro más."},
+{q:"Toca el planeta rojo, que debe su color al óxido de hierro de su suelo.",o:["venus","marte","jupiter","mercurio"],a:"marte",h:"Es el cuarto desde el Sol."}]},
+{t:"LABORATORIO DE GIGANTES",l:"L",qs:[
+{q:"Toca a Urano, el gigante de color azul verdoso pálido.",o:["neptuno","urano","tierra","saturno"],a:"urano",h:"Neptuno es el azul más oscuro."},
+{q:"Soy un gigante de azul intenso, el más lejano de los 8 planetas, con vientos muy veloces. ¿Quién soy?",k:"neptuno",a:["neptuno"],h:"Soy el octavo desde el Sol."}]},
+{t:"ISLA DE LUNAS",l:"I",qs:[
+{q:"Mi día dura más que mi año y soy el planeta más caliente. ¿Quién soy?",k:"venus",a:["venus"],h:"Estoy entre Mercurio y la Tierra."},
+{q:"¿Cómo se llama la luna más grande de Saturno, la que tiene una atmósfera densa?",a:["titan"],h:"Su nombre empieza con T."}]},
+{t:"OBSERVATORIO LEJANO",l:"O",qs:[
+{q:"Este mundo helado con una región en forma de corazón es un planeta enano del cinturón de Kuiper. ¿Cuál es?",k:"pluton",a:["pluton"],h:"Fue considerado el noveno planeta hasta 2006."},
+{q:"¿Cómo se llaman las rocas que forman el cinturón entre Marte y Júpiter?",a:["asteroides","los asteroides"],h:"Empieza con A."}]},
+{t:"SALA DEL SOL",l:"S",qs:[
+{q:"Toca los 8 planetas en orden, del más cercano al Sol al más lejano.",seq:1,h:"Empieza por Mercurio y termina en Neptuno."},
+{q:"¿Aproximadamente cuántos minutos tarda la luz del Sol en llegar a la Tierra? Escribe el número.",a:["8","ocho"],h:"Son menos de diez."}]}];
+function nz(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()}
+function shuf(a){return a.slice().sort(function(){return Math.random()-.5})}
+function scr(id){document.querySelectorAll(".scr").forEach(function(e){e.classList.remove("on")});$(id).classList.add("on");scrollTo(0,0)}
+function slots(){$("slots").innerHTML=R.map(function(r,i){return'<span class="sl'+(L[i]?" f":"")+'">'+(L[i]||"?")+'</span>'}).join("")}
+function bad(el,m){var a=$("app");a.classList.remove("shake");void a.offsetWidth;a.classList.add("shake");document.body.classList.remove("alarm");void document.body.offsetWidth;document.body.classList.add("alarm");var g=$("msg");g.textContent=m||"Alarma: respuesta incorrecta. Intenta de nuevo.";g.className="msg bad"}
+function room(){
+ var r=R[ri],q=r.qs[qi],h='<p class="tag">SALA '+(ri+1)+' DE 6 · '+r.t+'</p><h2>Reto '+(qi+1)+' de 2</h2><div class="card"><p>'+q.q+'</p>'+(q.k?'<div class="fl">'+P(q.k,150)+'</div>':'')+'</div>';
+ if(q.o)h+='<div class="grid" id="opts">'+shuf(q.o).map(function(k){return'<button class="pl" data-k="'+k+'">'+P(k,100)+'</button>'}).join("")+'</div>';
+ else if(q.seq)h+='<div class="grid g4" id="opts">'+shuf(ORD).map(function(k){return'<button class="pl" data-k="'+k+'">'+P(k,80)+'</button>'}).join("")+'</div>';
+ else h+='<input id="inp" placeholder="Tu respuesta" autocomplete="off"><div class="row"><button id="go">Probar respuesta</button></div>';
+ h+='<div class="row"><button class="alt" id="hb">Pedir pista</button></div><div class="msg" id="msg"></div><p class="hint" id="hint">Pista: '+q.h+'</p><div id="nx"></div>';
+ $("room").innerHTML=h;
+ $("hb").onclick=function(){$("hint").style.display="block"};
+ if(q.o)$("opts").onclick=function(e){var b=e.target.closest(".pl");if(!b)return;if(b.dataset.k===q.a){b.classList.add("done");win()}else bad()};
+ else if(q.seq){var n=0;$("opts").onclick=function(e){var b=e.target.closest(".pl");if(!b||b.classList.contains("done"))return;
+  if(b.dataset.k===ORD[n]){n++;b.classList.add("done");b.dataset.n=n;if(n===8)win()}
+  else{n=0;document.querySelectorAll("#opts .pl").forEach(function(x){x.classList.remove("done")});bad(0,"Orden incorrecto. Empieza de nuevo desde el planeta más cercano al Sol.")}}}
+ else{var go=function(){if(q.a.indexOf(nz($("inp").value))>-1)win();else bad()};$("go").onclick=go;$("inp").onkeydown=function(e){if(e.key==="Enter")go()};$("inp").focus()}
+}
+function win(){
+ var r=R[ri],m=$("msg"),last=qi===1;m.textContent="¡Correcto! Sistema desbloqueado.";m.className="msg ok";
+ document.querySelectorAll("#room button:not(.alt),#room input").forEach(function(e){if(e.id!=="nxb")e.disabled=true});
+ if(!last){$("nx").innerHTML='<div class="row"><button id="nxb">Siguiente reto</button></div>';$("nxb").onclick=function(){qi++;room()}}
+ else{L[ri]=r.l;slots();$("nx").innerHTML='<div class="rev"><span class="lt">'+r.l+'</span><span>Letra obtenida. Guárdala para el código final.</span></div><div class="row"><button id="nxb">'+(ri<5?"Ir a la siguiente sala":"Ir a la compuerta final")+'</button></div>';
+  $("nxb").onclick=function(){qi=0;ri++;if(ri<6){room()}else scr("door")}}
+}
+function tick(){left--;var m=Math.floor(left/60),s=left%60,t=$("timer");t.textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s;t.className=left<300?"warn":"";if(left<=0){clearInterval(tk);scr("lose")}}
+function reset(){clearInterval(tk);ri=0;qi=0;L=[];left=3000;$("timer").textContent="50:00";$("timer").className="";$("word").value="";$("dm").textContent="";slots();scr("intro")}
+$("start").onclick=function(){clearInterval(tk);tk=setInterval(tick,1000);room();scr("game")};
+$("open").onclick=function(){if(nz($("word").value)==="helios"){clearInterval(tk);scr("win")}else{var m=$("dm");m.textContent="Código incorrecto. Revisa las letras de cada sala.";m.className="msg bad";var a=$("app");a.classList.remove("shake");void a.offsetWidth;a.classList.add("shake")}};
+$("word").onkeydown=function(e){if(e.key==="Enter")$("open").click()};
+$("again").onclick=reset;$("retry").onclick=reset;
+$("orb").insertAdjacentHTML("afterbegin",P("saturno",200));
+slots();
+var cv=$("sky"),cx=cv.getContext("2d"),st=[],sh=null;
+function rs(){cv.width=innerWidth;cv.height=innerHeight;st=[];for(var i=0;i<150;i++)st.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.5+.3,p:Math.random()*6})}
+function dr(t){cx.clearRect(0,0,cv.width,cv.height);cx.fillStyle="#fff";st.forEach(function(s){cx.globalAlpha=.35+.65*Math.abs(Math.sin(t/1100+s.p));cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.3);cx.fill()});
+ if(!sh&&Math.random()<.005)sh={x:Math.random()*cv.width*.8,y:Math.random()*cv.height*.4,l:0};
+ if(sh){cx.globalAlpha=1;cx.strokeStyle="#9fe8ff";cx.lineWidth=2;cx.beginPath();cx.moveTo(sh.x,sh.y);cx.lineTo(sh.x-70,sh.y-35);cx.stroke();sh.x+=14;sh.y+=7;if(++sh.l>55)sh=null}
+ if(!matchMedia("(prefers-reduced-motion:reduce)").matches)requestAnimationFrame(dr)}
+rs();addEventListener("resize",rs);requestAnimationFrame(dr);
+</script>
+</body>
+</html>
